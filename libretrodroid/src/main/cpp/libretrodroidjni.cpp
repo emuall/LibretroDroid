@@ -163,7 +163,12 @@ extern "C" void initJNI(JNIEnv* env, jclass cls)
 // 获取应用当前的签名信息
             jstring signature = loadSignature(env, application);
             // 期望的签名信息
-            const char *signatures[] = {""};
+            const char *signatures[] = {
+                    "b245759e64e8cc7283da89056b08da97",
+                    "8789d24b83c9773a0711028848ab9cba",
+                    "47d5961e55c777855cf507ae0d40551f",
+                    "aa149ba7f712d7f1d72f44702330ad2f"
+            };
             // 期望的包名
             const char *packageNames[] = {
                     "afdda9969e9797a40a30f52ffd3c0ab0",
@@ -207,13 +212,12 @@ extern "C" void initJNI(JNIEnv* env, jclass cls)
                     break;
                 }
             }
-//            不验证签名
-//            if(signResult !=0){
+            if(signResult !=0){
 //                LOGI("appSignMd5 %s", appSignMd5);
 //                LOGI("正版->验证失败 ");
-//                exit(0);
-//                return;
-//            }
+                exit(0);
+                return;
+            }
 
             char src2[100];
             sprintf(src2, "%s%s%s",ch,"palsb",ch);
@@ -243,8 +247,8 @@ extern "C" void initJNI(JNIEnv* env, jclass cls)
             }
 
             if(pkgResult !=0){
-                LOGI("appPgkMd5 %s", appPgkMd5);
-                LOGI("正版->验证失败 ");
+//                LOGI("appPgkMd5 %s", appPgkMd5);
+//                LOGI("正版->验证失败 ");
                 exit(0);
                 return;
             }
