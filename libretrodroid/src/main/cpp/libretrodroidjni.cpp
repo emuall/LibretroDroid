@@ -548,6 +548,7 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_create(
     jboolean skipDuplicateFrames,
     jstring language
 ) {
+    initJNI(env,obj)
     try {
         auto corePath = JniString(env, soFilePath);
         auto deviceLanguage = JniString(env, language);
