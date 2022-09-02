@@ -49,6 +49,209 @@ extern "C" {
 #include "utils/utils.h"
 #include "../../libretro-common/include/libretro.h"
 #include "utils/libretrodroidexception.h"
+#include "md5.h"
+}
+
+extern "C" void Hex2Str( const char *sSrc,  char *sDest, int nSrcLen )
+{
+    int  i;
+    char szTmp[3];
+
+    for( i = 0; i < nSrcLen; i++ )
+    {
+        sprintf( szTmp, "%02X", (unsigned char) sSrc[i] );
+        memcpy( &sDest[i * 2], szTmp, 2 );
+    }
+    return ;
+}
+
+extern "C" jstring ToMd5(JNIEnv *env, jbyteArray source) {
+    // MessageDigest类
+    jclass classMessageDigest = env->FindClass("java/security/MessageDigest");
+    // MessageDigest.getInstance()静态方法
+    jmethodID midGetInstance = env->GetStaticMethodID(classMessageDigest, "getInstance", "(Ljava/lang/String;)Ljava/security/MessageDigest;");
+    // MessageDigest object
+    jobject objMessageDigest = env->CallStaticObjectMethod(classMessageDigest, midGetInstance, env->NewStringUTF("md5"));
+    // update方法，这个函数的返回值是void，写V
+    jmethodID midUpdate = env->GetMethodID(classMessageDigest, "update", "([B)V");
+    env->CallVoidMethod(objMessageDigest, midUpdate, source);
+    // digest方法
+    jmethodID midDigest = env->GetMethodID(classMessageDigest, "digest", "()[B");
+    jbyteArray objArraySign = (jbyteArray) env->CallObjectMethod(objMessageDigest, midDigest);
+    jsize intArrayLength = env->GetArrayLength(objArraySign);
+    jbyte* byte_array_elements = env->GetByteArrayElements(objArraySign, NULL);
+    size_t length = (size_t) intArrayLength * 2 + 1;
+    char* char_result = (char*) malloc(length);
+    memset(char_result, 0, length);
+    // 将byte数组转换成16进制字符串，发现这里不用强转，jbyte和unsigned char应该字节数是一样的
+    Hex2Str((const char*)byte_array_elements, char_result, intArrayLength);
+    // 在末尾补\0
+    *(char_result + intArrayLength * 2) = '\0';
+    jstring stringResult = env->NewStringUTF(char_result);
+    // release
+    env->ReleaseByteArrayElements(objArraySign, byte_array_elements, JNI_ABORT);
+    // 释放指针使用free
+    free(char_result);
+    return stringResult;
+}
+extern "C" jstring loadSignature(JNIEnv *env, jobject context)
+{
+    // 获取Context类
+    jclass contextClass = env->GetObjectClass(context);
+    // 得到getPackageManager方法的ID
+    jmethodID getPkgManagerMethodId = env->GetMethodID(contextClass, "getPackageManager", "()Landroid/content/pm/PackageManager;");
+    // PackageManager
+    jobject pm = env->CallObjectMethod(context, getPkgManagerMethodId);
+    // 得到应用的包名
+    jmethodID pkgNameMethodId = env->GetMethodID(contextClass, "getPackageName", "()Ljava/lang/String;");
+    jstring  pkgName = (jstring) env->CallObjectMethod(context, pkgNameMethodId);
+
+    // 获得PackageManager类
+    jclass cls = env->GetObjectClass(pm);
+    // 得到getPackageInfo方法的ID
+    jmethodID mid = env->GetMethodID(cls, "getPackageInfo", "(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;");
+    // 获得应用包的信息
+    jobject packageInfo = env->CallObjectMethod(pm, mid, pkgName, 0x40); //GET_SIGNATURES = 64;
+    // 获得PackageInfo 类
+    cls = env->GetObjectClass(packageInfo);
+    // 获得签名数组属性的ID
+    jfieldID fid = env->GetFieldID(cls, "signatures", "[Landroid/content/pm/Signature;");
+    // 得到签名数组
+    jobjectArray signatures = (jobjectArray) env->GetObjectField(packageInfo, fid);
+    // 得到签名
+    jobject signature = env->GetObjectArrayElement(signatures, 0);
+    // 获得Signature类
+    cls = env->GetObjectClass(signature);
+    // 得到toCharsString方法的ID
+    mid = env->GetMethodID(cls, "toByteArray", "()[B");
+    // 返回当前应用签名信息
+    jbyteArray signatureByteArray = (jbyteArray) env->CallObjectMethod(signature, mid);
+    return ToMd5(env, signatureByteArray);
+}
+extern "C" void initJNI(JNIEnv* env, jclass cls)
+{
+    if (!env) {
+        return;
+    }
+
+    jclass localClass = env->FindClass("android/app/ActivityThread");
+    if (localClass != NULL) {
+        jmethodID getapplication = env->GetStaticMethodID(localClass, "currentApplication",
+                                                          "()Landroid/app/Application;");
+        if (getapplication != NULL) {
+            jobject application = env->CallStaticObjectMethod(localClass, getapplication);
+            jclass context = env->GetObjectClass(application);
+
+            // 签名验证
+            jmethodID methodID_sign = env->GetMethodID(context, "getPackageCodePath",
+                                                       "()Ljava/lang/String;");
+            jstring s_path = static_cast<jstring>(env->CallObjectMethod(application, methodID_sign));
+            const char *ch_path = env->GetStringUTFChars(s_path, 0);;
+            //LOGI("%s", ch_path);
+            //uncompress_apk(ch_path, "META-INF/CERT.RSA");//.SF
+            env->ReleaseStringUTFChars(s_path, ch_path);
+
+
+            // 包名验证
+            jmethodID methodID_pgk = env->GetMethodID(context, "getPackageName",
+                                                      "()Ljava/lang/String;");
+            jstring path = static_cast<jstring>(env->CallObjectMethod(application, methodID_pgk));
+            const char *ch = env->GetStringUTFChars(path, 0);;
+
+
+// 简单签名验证
+// 获取应用当前的签名信息
+            jstring signature = loadSignature(env, application);
+            // 期望的签名信息
+            const char *signatures[] = {""};
+            // 期望的包名
+            const char *packageNames[] = {
+                    "afdda9969e9797a40a30f52ffd3c0ab0",
+                    "339a7d2e635c49c3484b68ea8c7bf854",
+                    "17cbc1b69d3732721c6739768df97a1e",
+                    "a0622cf1b655bf9bb882806ff75359c6",
+                    "f9652bcbf6bd33860d6e1b5e3cf840c2",
+                    "651068a72c93c4a797f7bf0792f30da9",
+                    "babcb0e83d19dde8b595805f8eca23df",
+                    "b77a8ad546db2258f8d6cefce623bdbc",
+                    "33752edca8f03e613710b5778136872b",
+                    "5f26053121868644a7b7a8956d3fcbe8"
+            };
+
+            const char *releaseMD5 = env->GetStringUTFChars(signature, NULL);
+
+
+            char src[100];
+            sprintf(src, "%s%s%s",releaseMD5,"palsb",releaseMD5);
+            //LOGI("md51 %s", src);
+
+            MD5_CTX ctx1 = { 0 };
+            MD5Init(&ctx1);
+            MD5Update(&ctx1, (unsigned char*)src, strlen(src));
+            unsigned char dest1[16] = { 0 };
+            MD5Final(dest1, &ctx1);
+
+            int i = 0;
+            char appSignMd5[33] = { 0 };
+            for (i = 0; i < 16; i++)
+            {
+                sprintf(appSignMd5, "%s%02x", appSignMd5, dest1[i]);
+            }
+
+            // 比较两个签名信息是否相等
+            int signResult = 0;
+            int singSize = sizeof(signatures)/sizeof(*signatures);
+            for (int i = 0; i < singSize; i++) {
+                signResult = strcmp(signatures[i], appSignMd5);
+                if (signResult == 0 ) {
+                    break;
+                }
+            }
+//            不验证签名
+//            if(signResult !=0){
+//                LOGI("appSignMd5 %s", appSignMd5);
+//                LOGI("正版->验证失败 ");
+//                exit(0);
+//                return;
+//            }
+
+            char src2[100];
+            sprintf(src2, "%s%s%s",ch,"palsb",ch);
+
+            MD5_CTX ctx = { 0 };
+            MD5Init(&ctx);
+            MD5Update(&ctx, (unsigned char*)src2, strlen(src2));
+            unsigned char dest[16] = { 0 };
+            MD5Final(dest, &ctx);
+
+            int j = 0;
+            char appPgkMd5[33] = { 0 };
+            for (j = 0; j < 16; j++)
+            {
+                sprintf(appPgkMd5, "%s%02x", appPgkMd5, dest[j]);
+            }
+            //LOGI("MD53->%s", appPgkMd5);
+
+            // 比较两个包名是否相等
+            int pkgResult = 0;
+            int pkgSize = sizeof(packageNames)/sizeof(*packageNames);
+            for (int i = 0; i < pkgSize; i++) {
+                pkgResult = strcmp(packageNames[i], appPgkMd5);
+                if (pkgResult == 0 ) {
+                    break;
+                }
+            }
+
+            if(pkgResult !=0){
+                LOGI("appPgkMd5 %s", appPgkMd5);
+                LOGI("正版->验证失败 ");
+                exit(0);
+                return;
+            }
+
+            env->ReleaseStringUTFChars(path, ch);
+        }
+    }
 }
 
 extern "C" {
@@ -550,5 +753,6 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_setShaderT
 }
 
 }
+
 
 }

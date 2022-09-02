@@ -68,6 +68,8 @@ add_library(libretrodroid SHARED
         utils/libretrodroidexception.cpp
         errorcodes.h
         errorcodes.cpp
+        md5.h
+        md5.c
         vfs/vfs.h
         vfs/vfs.cpp
         vfs/vfsfile.h
