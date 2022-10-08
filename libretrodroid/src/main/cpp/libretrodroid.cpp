@@ -398,14 +398,14 @@ void LibretroDroid::destroy() {
     core->retro_unload_game();
     core->retro_deinit();
 
+    Environment::getInstance().deinitialize();
+    VFS::getInstance().deinitialize();
+
     video = nullptr;
     core = nullptr;
     rumble = nullptr;
     fpsSync = nullptr;
     audio = nullptr;
-
-    Environment::getInstance().deinitialize();
-    VFS::getInstance().deinitialize();
 }
 
 void LibretroDroid::resume() {

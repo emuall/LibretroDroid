@@ -337,7 +337,7 @@ class GLRetroView(
         } catch (e: RetroException) {
             retroGLIssuesErrors.accept(e.errorCode)
             isAborted = true
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e(TAG_LOG, "Error in GLRetroView", e)
             retroGLIssuesErrors.accept(LibretroDroid.ERROR_GENERIC)
         }
