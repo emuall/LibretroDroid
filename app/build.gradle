@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
@@ -17,20 +16,18 @@ android {
                           'proguard-rules.pro'
         }
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
     api project(path: ':libretrodroid')
     implementation "androidx.core:core-ktx:1.9.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
     implementation "androidx.appcompat:appcompat:1.5.1"
 
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-    implementation "com.github.swordfish90:radialgamepad:08d1dd95"
-}
-
-repositories {
-    mavenCentral()
+    implementation "com.github.swordfish90:radialgamepad:1.0.1"
 }
 
