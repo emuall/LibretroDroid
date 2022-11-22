@@ -545,7 +545,7 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_create(
     jstring systemDir,
     jstring savesDir,
     jobjectArray jVariables,
-    jint shaderType,
+    jobject shaderConfig,
     jfloat refreshRate,
     jboolean preferLowLatencyAudio,
     jboolean enableVirtualFileSystem,
@@ -573,7 +573,7 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_create(
             systemDirectory.stdString(),
             savesDirectory.stdString(),
             variables,
-            shaderType,
+            JavaUtils::shaderFromJava(env, shaderConfig),
             refreshRate,
             preferLowLatencyAudio,
             enableVirtualFileSystem,
@@ -646,8 +646,12 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadGameFr
 
         std::vector<VFSFile> virtualFiles;
 
-        JavaUtils::javaListForEach(env, virtualFileList, [&](jobject item) {
-            JniString virtualFileName(env, (jstring) env->CallObjectMethod(item, getVirtualFileMethodID));
+        JavaUtils::forEachOnJavaIterable(env, virtualFileList, [&](jobject item) {
+            JniString virtualFileName(env,(jstring) env->CallObjectMethod(
+                item,
+                getVirtualFileMethodID
+            ));
+
             int fileDescriptor = env->CallIntMethod(item, getFileDescriptorMethodID);
             virtualFiles.emplace_back(VFSFile(virtualFileName.stdString(), fileDescriptor));
         });
@@ -749,12 +753,12 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_setAudioEn
     LibretroDroid::getInstance().setAudioEnabled(enabled);
 }
 
-JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_setShaderType(
+JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_setShaderConfig(
     JNIEnv* env,
     jclass obj,
-    jint shaderType
+    jobject shaderConfig
 ) {
-    LibretroDroid::getInstance().setShaderType(shaderType);
+    LibretroDroid::getInstance().setShaderConfig(JavaUtils::shaderFromJava(env, shaderConfig));
 }
 
 }
