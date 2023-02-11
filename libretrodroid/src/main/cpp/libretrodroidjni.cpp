@@ -418,6 +418,43 @@ JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadGameFr
     }
 }
 
+JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadGameFromSAFPath(
+        JNIEnv* env,
+        jclass obj,
+        jobject virtualFileList
+) {
+
+    try {
+        jmethodID getVirtualFileMethodID = env->GetMethodID(
+                env->FindClass("com/swordfish/libretrodroid/DetachedVirtualFile"),
+                "getVirtualPath",
+                "()Ljava/lang/String;"
+        );
+        jmethodID getFileDescriptorMethodID = env->GetMethodID(
+                env->FindClass("com/swordfish/libretrodroid/DetachedVirtualFile"),
+                "getFileDescriptor",
+                "()I"
+        );
+
+        std::vector<VFSFile> virtualFiles;
+
+        JavaUtils::forEachOnJavaIterable(env, virtualFileList, [&](jobject item) {
+            JniString virtualFileName(env,(jstring) env->CallObjectMethod(
+                item,
+                getVirtualFileMethodID
+            ));
+
+            int fileDescriptor = env->CallIntMethod(item, getFileDescriptorMethodID);
+            virtualFiles.emplace_back(VFSFile(virtualFileName.stdString(), fileDescriptor));
+        });
+
+        LibretroDroid::getInstance().loadGameFromSAFPath(std::move(virtualFiles));
+    } catch (std::exception &exception) {
+        LOGE("Error in loadGameFromDescriptors: %s", exception.what());
+        JavaUtils::throwRetroException(env, ERROR_LOAD_GAME);
+    }
+}
+
 JNIEXPORT void JNICALL Java_com_swordfish_libretrodroid_LibretroDroid_loadGameFromVirtualFiles(
         JNIEnv* env,
         jclass obj,

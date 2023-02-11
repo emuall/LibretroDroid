@@ -310,6 +310,7 @@ class GLRetroView(
             data.gameFilePath != null -> loadGameFromPath(data.gameFilePath!!)
             data.gameFileBytes != null -> loadGameFromBytes(data.gameFileBytes!!)
             data.gameVirtualFiles.isNotEmpty() -> loadGameFromVirtualFiles(data.gameVirtualFiles)
+            data.gameSAFFiles.isNotEmpty() -> loadGameFromSAFFiles(data.gameVirtualFiles)
         }
         data.saveRAMState?.let {
             LibretroDroid.unserializeSRAM(data.saveRAMState)
@@ -327,6 +328,12 @@ class GLRetroView(
         val detachedVirtualFiles = virtualFiles
             .map { DetachedVirtualFile(it.virtualPath, it.fileDescriptor.detachFd()) }
         LibretroDroid.loadGameFromVirtualFiles(detachedVirtualFiles)
+    }
+
+    private fun loadGameFromSAFFiles(virtualFiles: List<VirtualFile>) {
+        val detachedVirtualFiles = virtualFiles
+            .map { DetachedVirtualFile(it.virtualPath, it.fileDescriptor.detachFd()) }
+        LibretroDroid.loadGameFromSAFPath(detachedVirtualFiles)
     }
 
     private fun loadGameFromBytes(gameFileBytes: ByteArray) {

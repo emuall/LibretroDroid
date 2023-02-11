@@ -347,6 +347,36 @@ void LibretroDroid::loadGameFromBytes(const int8_t *data, size_t size) {
     afterGameLoad();
 }
 
+void LibretroDroid::loadGameFromSAFPath(std::vector<VFSFile> virtualFiles) {
+    LOGD("Performing libretrodroid loadGameFromSAFPath");
+    struct retro_system_info system_info {};
+    core->retro_get_system_info(&system_info);
+
+    if (virtualFiles.empty()) {
+        LOGE("Calling loadGameFromVirtualFiles without any file.");
+        throw std::runtime_error("Calling loadGameFromVirtualFiles without any file.");
+    }
+
+    std::string firstFilePath = virtualFiles[0].getFileName();
+    int firstFileFD = virtualFiles[0].getFD();
+
+    struct retro_game_info game_info {};
+    game_info.path = nullptr;
+    game_info.meta = nullptr;
+
+    struct Utils::ReadResult file = Utils::readFileAsBytes(firstFileFD);
+    game_info.data = file.data;
+    game_info.size = file.size;
+
+    bool result = core->retro_load_game(&game_info);
+    if (!result) {
+        LOGE("Cannot load game. Leaving.");
+        throw std::runtime_error("Cannot load game");
+    }
+
+    afterGameLoad();
+}
+
 void LibretroDroid::loadGameFromVirtualFiles(std::vector<VFSFile> virtualFiles) {
     LOGD("Performing libretrodroid loadGameFromVirtualFiles");
     struct retro_system_info system_info {};

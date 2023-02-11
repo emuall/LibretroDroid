@@ -65,6 +65,7 @@ public class LibretroDroid {
     );
 
     public static native void loadGameFromPath(String gameFilePath);
+    public static native void loadGameFromSAFPath(List<DetachedVirtualFile> virtualFiles);
     public static native void loadGameFromBytes(byte[] gameFileBytes);
     public static native void loadGameFromVirtualFiles(List<DetachedVirtualFile> virtualFiles);
     public static native void resume();
