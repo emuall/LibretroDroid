@@ -310,7 +310,7 @@ class GLRetroView(
             data.gameFilePath != null -> loadGameFromPath(data.gameFilePath!!)
             data.gameFileBytes != null -> loadGameFromBytes(data.gameFileBytes!!)
             data.gameVirtualFiles.isNotEmpty() -> loadGameFromVirtualFiles(data.gameVirtualFiles)
-            data.gameSAFFiles.isNotEmpty() -> loadGameFromSAFFiles(data.gameVirtualFiles)
+            data.gameSAFFiles.isNotEmpty() -> loadGameFromSAFFiles(data.gameSAFFiles)
         }
         data.saveRAMState?.let {
             LibretroDroid.unserializeSRAM(data.saveRAMState)

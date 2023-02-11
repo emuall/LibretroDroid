@@ -353,8 +353,8 @@ void LibretroDroid::loadGameFromSAFPath(std::vector<VFSFile> virtualFiles) {
     core->retro_get_system_info(&system_info);
 
     if (virtualFiles.empty()) {
-        LOGE("Calling loadGameFromVirtualFiles without any file.");
-        throw std::runtime_error("Calling loadGameFromVirtualFiles without any file.");
+        LOGE("Calling loadGameFromSAFPath without any file.");
+        throw std::runtime_error("Calling loadGameFromSAFPath without any file.");
     }
 
     std::string firstFilePath = virtualFiles[0].getFileName();
