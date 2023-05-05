@@ -48,6 +48,8 @@ class SampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sample_activity)
 
+        val gamePath = getExternalFilesDir(null)?.absolutePath + "a.nes"
+        FileUtil.copyFromAsses(this,"demo.nes",gamePath)
         /* Prepare config for GLRetroView */
         val data = GLRetroViewData(this).apply {
             /*
@@ -57,13 +59,13 @@ class SampleActivity : AppCompatActivity() {
              *
              * ABI can be arm64-v8a, armeabi-v7a, x86, or x86_64
              */
-            coreFilePath = "libmgba_libretro_android.so"
+            coreFilePath = "libfceumm_libretro_android.so"
 
             /*
              * The path to the ROM to load.
              * Example: /data/data/<package-id>/files/example.gba
              */
-            gameFilePath = "/data/data/<package-id>/files/example.gba"
+            gameFilePath = gamePath
 
             /*
              * Direct ROM bytes to load.
@@ -216,8 +218,8 @@ class SampleActivity : AppCompatActivity() {
         rightPad.gravityX = 1f
         rightPad.gravityY = 1f
 
-        findViewById<FrameLayout>(R.id.leftcontainer).addView(leftPad)
-        findViewById<FrameLayout>(R.id.rightcontainer).addView(rightPad)
+        findViewById<FrameLayout>(R.id.leftgamepad).addView(leftPad)
+        findViewById<FrameLayout>(R.id.rightgamepad).addView(rightPad)
 
         lifecycleScope.launch {
             merge(leftPad.events(), rightPad.events())

@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
@@ -8,26 +7,52 @@ android {
         applicationId 'com.android.gl2jni'
         minSdkVersion 21
         targetSdkVersion 33
+
+        versionCode 1
+        versionName "1.0"
+
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../key/key.jks")
+            storePassword "123456"
+            keyAlias "key"
+            keyPassword "123456"
+        }
     }
 
     buildTypes {
-        release {
+        debug {
+            signingConfig signingConfigs.release
             minifyEnabled = false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-                          'proguard-rules.pro'
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    namespace 'com.android.libretrodroid'
 }
 
 dependencies {
     api project(path: ':libretrodroid')
-    implementation "androidx.core:core-ktx:1.9.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
-    implementation "androidx.appcompat:appcompat:1.5.1"
+    implementation "androidx.core:core-ktx:1.10.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
+    implementation "androidx.appcompat:appcompat:1.6.1"
 
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-    implementation "com.github.swordfish90:radialgamepad:08d1dd95"
+//    implementation "com.github.swordfish90:radialgamepad:08d1dd95"
+    implementation "com.github.emuall:RadialGamePad:1.0.1.5.004"
 }
 
 repositories {
