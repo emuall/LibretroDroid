@@ -149,7 +149,7 @@ class GLRetroView(
         LibretroDroid.setCheat(index, enable, code)
     }
 
-    fun setCheat() = runOnGLThread {
+    fun resetCheat() = runOnGLThread {
         LibretroDroid.resetCheat()
     }
 
