@@ -6,3 +6,5 @@ app/*.iml
 .idea
 *.iml
 local.properties
+.cxx/*
+.cxx
