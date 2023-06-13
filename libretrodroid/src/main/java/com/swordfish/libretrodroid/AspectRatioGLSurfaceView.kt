@@ -66,12 +66,15 @@ open class AspectRatioGLSurfaceView(context: Context) : GLSurfaceView(context) {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        if (resizeMode == RESIZE_MODE_FILL || videoAspectRatio <= 0) { // Aspect ratio not set.
-            return
-        }
-        
+
         var width = measuredWidth
         var height = measuredHeight
+        if (resizeMode == RESIZE_MODE_FILL || videoAspectRatio <= 0) { // Aspect ratio not set.
+            super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
+            return
+        }
+
         val viewAspectRatio = width.toFloat() / height
         val aspectDeformation: Float = videoAspectRatio / viewAspectRatio - 1
         if (Math.abs(aspectDeformation) <= MAX_ASPECT_RATIO_DEFORMATION_FRACTION) { // We're within the allowed tolerance.

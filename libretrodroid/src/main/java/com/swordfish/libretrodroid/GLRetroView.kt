@@ -149,6 +149,10 @@ class GLRetroView(
         LibretroDroid.setCheat(index, enable, code)
     }
 
+    fun setCheat() = runOnGLThread {
+        LibretroDroid.resetCheat()
+    }
+
     fun unserializeState(data: ByteArray): Boolean = runOnGLThread {
         LibretroDroid.unserializeState(data)
     }
@@ -285,7 +289,11 @@ class GLRetroView(
 
         override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) = catchExceptions {
             Thread.currentThread().priority = Thread.MAX_PRIORITY
-            LibretroDroid.onSurfaceChanged(width, height)
+            if (renderMode == RESIZE_MODE_FILL) {
+                LibretroDroid.onSurfaceChanged(width, height)
+            } else {
+                LibretroDroid.onSurfaceChanged(width, height)
+            }
         }
 
 

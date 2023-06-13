@@ -112,7 +112,7 @@ class SampleActivity : AppCompatActivity() {
 
         /* Initialize the main emulator view */
         retroView = GLRetroView(this, data)
-
+        retroView.setResizeMode(AspectRatioGLSurfaceView.RESIZE_MODE_FILL)
         lifecycle.addObserver(retroView)
 
         /* Get the FrameLayout to house the GLRetroView */
