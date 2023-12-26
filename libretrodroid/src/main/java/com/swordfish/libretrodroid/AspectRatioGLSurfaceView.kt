@@ -69,7 +69,6 @@ open class AspectRatioGLSurfaceView(context: Context) : GLSurfaceView(context) {
         if (resizeMode == RESIZE_MODE_FILL || videoAspectRatio <= 0) { // Aspect ratio not set.
             return
         }
-        
         var width = measuredWidth
         var height = measuredHeight
         val viewAspectRatio = width.toFloat() / height

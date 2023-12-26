@@ -14,9 +14,10 @@
       android:label="@string/activity_title">
     <activity
         android:name="com.swordfish.libretrodroid.SampleActivity"
+        android:screenOrientation="landscape"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:launchMode="singleTask"
-        android:exported="false"
+        android:exported="true"
         android:configChanges="orientation|screenSize|keyboardHidden">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
