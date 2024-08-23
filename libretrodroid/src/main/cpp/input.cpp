@@ -133,6 +133,7 @@ int16_t Input::getInputState(unsigned port, unsigned device, unsigned index, uns
 
 int Input::convertAndroidToLibretroKey(int keyCode) const {
     switch (keyCode) {
+        case AKEYCODE_ENTER:
         case AKEYCODE_BUTTON_START:
             return RETRO_DEVICE_ID_JOYPAD_START;
         case AKEYCODE_BUTTON_SELECT:
