@@ -4,12 +4,14 @@ apply plugin: 'kotlin-android'
 group='com.github.Swordfish90'
 
 android {
-    compileSdkVersion 33
-
+    namespace "com.swordfish.libretrodroid"
+    compileSdk 33
 
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -36,14 +38,13 @@ android {
         }
     }
 
-    kotlinOptions {
-        jvmTarget = '17'
-    }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-    namespace 'com.swordfish.libretrodroid'
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
 }
 
 dependencies {
