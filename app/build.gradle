@@ -1,33 +1,61 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android-extensions'
+//apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    namespace "com.android.libretrodroid"
+    compileSdk 34
     defaultConfig {
         applicationId 'com.android.gl2jni'
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    //配置keystore签名
+    signingConfigs {
+        release {
+            storeFile file("../key/20240812_5JXM8ynQRs7RJgVB.jks")
+            storePassword "5JXM8ynQRs7RJgVB"
+            keyAlias "0812"
+            keyPassword "5JXM8ynQRs7RJgVB"
+        }
     }
 
     buildTypes {
-        release {
-            minifyEnabled = false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-                          'proguard-rules.pro'
+        debug {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 
 dependencies {
     api project(path: ':libretrodroid')
-    implementation "androidx.core:core-ktx:1.9.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
-    implementation "androidx.appcompat:appcompat:1.5.1"
+    implementation "androidx.core:core-ktx:1.13.1"
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.8.6"
+    implementation "androidx.appcompat:appcompat:1.7.0"
 
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-    implementation "com.github.swordfish90:radialgamepad:08d1dd95"
+    implementation "com.github.swordfish90:radialgamepad:2.0.0"
 }
 
 repositories {
