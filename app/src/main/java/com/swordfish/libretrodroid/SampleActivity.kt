@@ -218,8 +218,8 @@ class SampleActivity : AppCompatActivity() {
         rightPad.gravityX = 1f
         rightPad.gravityY = 1f
 
-        findViewById<FrameLayout>(R.id.leftgamepad).addView(leftPad)
-        findViewById<FrameLayout>(R.id.rightgamepad).addView(rightPad)
+        findViewById<FrameLayout>(R.id.leftcontainer).addView(leftPad)
+        findViewById<FrameLayout>(R.id.rightcontainer).addView(rightPad)
 
         lifecycleScope.launch {
             merge(leftPad.events(), rightPad.events())
